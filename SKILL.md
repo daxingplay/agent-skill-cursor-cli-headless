@@ -5,105 +5,72 @@ description: Execute coding tasks using the Cursor CLI in headless print mode. U
 
 # Cursor CLI Headless
 
-Execute coding tasks using the Cursor CLI in non-interactive (print) mode for scripts, automation, and batch processing.
+Execute coding tasks using the Cursor CLI in non-interactive (print) mode via the wrapper script for scripts, automation, and batch processing.
 
 ## Prerequisites
 
 - **Cursor CLI installed**: Run `agent --version`. If missing, install: `curl https://cursor.com/install -fsS | bash` (macOS/Linux/WSL) or see [Installation](https://cursor.com/docs/cli/installation).
-- **Authenticated**: Set `CURSOR_API_KEY` in the environment for scripts, or run `agent login` interactively once.
+- **Authenticated**: Set `CURSOR_API_KEY` in the environment for scripts, or run `agent login` interactively once. Check if already logged in with `agent status` or `agent whoami`.
 
 ## Quick start
 
-**Inline prompt (short):**
+Use `scripts/run-task.sh` with either an inline prompt or a prompt file:
 
 ```bash
-agent -p --force "Refactor src/utils.js to use ES6+ syntax"
-```
-
-**Long prompt from file:**
-
-```bash
-agent -p --force "$(cat path/to/prompt.txt)"
-```
-
-**Using the wrapper script (recommended):**
-
-```bash
+# Prompt from file (stream progress by default)
 ./scripts/run-task.sh -f prompt.txt
-./scripts/run-task.sh -p "Add tests for auth module" -d /path/to/project -o json
+
+# Inline prompt, run in a specific project directory
+./scripts/run-task.sh -p "Add tests for auth module" -d /path/to/project
 ```
 
-## Prompt handling
+## Wrapper script: run-task.sh
 
-| Case | Command pattern |
-|------|-----------------|
-| Short inline | `agent -p [--force] "your prompt"` |
-| Long prompt from file | `agent -p [--force] "$(cat path/to/prompt.txt)"` |
-
-- Use `--force` when the task should **modify files**. Without it, the agent only proposes changes.
-- The agent runs in the **current working directory**; `cd` to the target project first, or use the script’s `-d` option.
-
-## Key flags
-
-| Flag | Description |
-|------|-------------|
-| `-p`, `--print` | Non-interactive mode; print response to stdout |
-| `--force` | Allow file modifications without confirmation |
-| `--output-format` | `text` (default), `json`, or `stream-json` |
-| `--stream-partial-output` | Character-level streaming (only with `stream-json`) |
-| `-m`, `--model` | Model to use |
-| `--mode` | `agent` (default), `plan`, or `ask` |
-| `--resume [chatId]` | Resume a previous session |
-
-## Output format selection
-
-| Format | Use when |
-|--------|----------|
-| `text` | You only need the final answer; clean, no structure |
-| `json` | You need to parse the result (e.g. `jq -r '.result'`); single object at end |
-| `stream-json` | You need progress (model init, tool calls, partial text); NDJSON, one event per line. Use `--stream-partial-output` for character-level streaming |
-
-## Using the wrapper script (recommended)
-
-**Recommended.** `scripts/run-task.sh` wraps the CLI with consistent argument handling. File modifications are allowed by default; use `--no-force` to only propose changes.
+`scripts/run-task.sh` runs the Cursor agent in headless mode. **Recommended:** keep file modifications and stream progress **on** (default). Use `--no-force` only with tmux for interactive mode (agent proposes changes for review). Use `--no-stream` for plain output.
 
 **Arguments:**
 
 - `-p "prompt"` — inline prompt (mutually exclusive with `-f`)
-- `-f prompt-file.txt` — read prompt from file
+- `-f prompt-file.txt` — read prompt from file (for long prompts)
 - `-d dir` — working directory (default: current directory)
-- `-o format` — `text`, `json`, or `stream-json` (default: `text`)
+- `-o format` — `text`, `json`, or `stream-json` (with default streaming, format is stream-json)
 - `-m model` — model name
 - `--mode mode` — `agent`, `plan`, or `ask`
 - `--force` — allow file modifications (default)
 - `--no-force` — do not modify files; agent only proposes changes
-- `--stream` — use `--stream-partial-output` (implies `stream-json`); requires `jq` for progress display
+- `--stream` — stream-json with progress display (default; requires `jq` for progress)
+- `--no-stream` — plain output only; use with `-o text` or `-o json`
+
+**Output formats:**
+
+| Format | Use when |
+|--------|----------|
+| (default stream) | Live progress (model, tool calls, chars); NDJSON on stdout, progress on stderr |
+| `-o text --no-stream` | Only the final assistant message |
+| `-o json --no-stream` | Single JSON object with `result`, `duration_ms`, etc.; parse with `jq -r '.result'` |
 
 **Examples:**
 
 ```bash
-# Task from file, apply changes (default), text output
+# Task from file, apply changes, stream progress (default)
 ./scripts/run-task.sh -f tasks/refactor-auth.txt
 
-# Inline prompt, specific project, JSON result
-./scripts/run-task.sh -p "Summarize README.md" -d /path/to/repo -o json
+# Inline prompt, specific project, JSON result only
+./scripts/run-task.sh -p "Summarize README.md" -d /path/to/repo --no-stream -o json
 
-# Stream with live progress
-./scripts/run-task.sh -f tasks/review.txt -o stream-json --stream
+# Plain text output, no progress
+./scripts/run-task.sh -f tasks/review.txt --no-stream -o text
 ```
+
+## Working directory
+
+The agent runs in the script’s working directory. Use `-d /path/to/project` so the agent sees that project as the root.
 
 ## Error handling
 
 - **Exit code**: Non-zero means the run failed; check stderr for the error message.
-- **JSON output**: On failure, no well-formed JSON is emitted; only stderr.
-- In scripts, always check `$?` after running `agent` or the wrapper and exit accordingly.
-
-## Working directory
-
-The headless agent uses the process **cwd** as the project root. Either:
-
-- `cd /path/to/project && agent -p --force "..."`, or
-- Use `scripts/run-task.sh -d /path/to/project ...`
+- With `-o json`, on failure no JSON is emitted; only stderr.
+- In scripts, check `$?` after the wrapper and exit accordingly.
 
 ## Additional resources
 
