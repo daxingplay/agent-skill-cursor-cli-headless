@@ -1,6 +1,14 @@
 ---
 name: cursor-cli-headless
 description: Execute coding tasks using the Cursor CLI in headless print mode. Use when delegating code writing, refactoring, analysis, or review tasks to a headless Cursor agent process, running automated code changes, or batch-processing files with the agent CLI.
+required_binaries:
+  - agent
+optional_binaries:
+  - jq
+env_vars:
+  - name: CURSOR_API_KEY
+    required: false
+    description: API key for Cursor CLI authentication (alternative to `agent login`)
 ---
 
 # Cursor CLI Headless
@@ -9,8 +17,9 @@ Execute coding tasks using the Cursor CLI in non-interactive (print) mode via th
 
 ## Prerequisites
 
-- **Cursor CLI installed**: Run `agent --version`. If missing, install: `curl https://cursor.com/install -fsS | bash` (macOS/Linux/WSL) or see [Installation](https://cursor.com/docs/cli/installation).
-- **Authenticated**: Set `CURSOR_API_KEY` in the environment for scripts, or run `agent login` interactively once. Check if already logged in with `agent status` or `agent whoami`.
+- **`agent` (Cursor CLI)** — required. Run `agent --version`. If missing, install: `curl https://cursor.com/install -fsS | bash` (macOS/Linux/WSL) or see [Installation](https://cursor.com/docs/cli/installation).
+- **`jq`** — optional; needed for stream progress display (`--stream`, the default). Without it, stream output is raw NDJSON.
+- **`CURSOR_API_KEY`** — set this env var for non-interactive/scripted authentication, or run `agent login` once for interactive login. Check if already logged in with `agent status` or `agent whoami`.
 
 ## Quick start
 
