@@ -19,7 +19,7 @@ Execute coding tasks using the Cursor CLI in non-interactive (print) mode via th
 
 - **`agent` (Cursor CLI)** — required. Run `agent --version`. If missing, install: `curl https://cursor.com/install -fsS | bash` (macOS/Linux/WSL) or see [Installation](https://cursor.com/docs/cli/installation).
 - **`jq`** — optional; needed for stream progress display (`--stream`, the default). Without it, stream output is raw NDJSON.
-- **`CURSOR_API_KEY`** — set this env var for non-interactive/scripted authentication, or run `agent login` once for interactive login. Check if already logged in with `agent status` or `agent whoami`.
+- **`CURSOR_API_KEY`** — optional. Check if already logged in with `agent status` or `agent whoami`. If not, set this env var for non-interactive/scripted authentication, or run `agent login` once for interactive login. 
 
 ## Quick start
 
