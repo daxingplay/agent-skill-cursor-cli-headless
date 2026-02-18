@@ -12,7 +12,7 @@ OUTPUT_FORMAT="text"
 MODEL=""
 MODE=""
 FORCE=true
-STREAM=false
+STREAM=true
 
 usage() {
   cat <<'EOF'
@@ -24,17 +24,18 @@ Prompt (exactly one):
 
 Options:
   -d dir            Working directory (default: cwd)
-  -o format         Output format: text, json, stream-json (default: text)
+  -o format         Output format: text, json, stream-json (default: stream-json when streaming)
   -m model          Model name
   --mode mode       Mode: agent, plan, ask
   --force           Allow file modifications (default)
   --no-force        Do not modify files; agent only proposes changes
-  --stream          Use stream-json with --stream-partial-output; show progress (requires jq)
+  --stream          Use stream-json with progress display (default; requires jq)
+  --no-stream       Plain output only (text or json per -o); no progress display
 
 Examples:
   ./scripts/run-task.sh -f task.txt
-  ./scripts/run-task.sh -p "Refactor utils.js" -d /path/to/project -o json
-  ./scripts/run-task.sh -f review.txt -o stream-json --stream
+  ./scripts/run-task.sh -p "Refactor utils.js" -d /path/to/project --no-stream -o json
+  ./scripts/run-task.sh -f review.txt --no-stream -o text
 EOF
   exit 1
 }
@@ -84,6 +85,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --stream)
       STREAM=true
+      shift
+      ;;
+    --no-stream)
+      STREAM=false
       shift
       ;;
     -h|--help)
