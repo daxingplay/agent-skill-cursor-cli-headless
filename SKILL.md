@@ -26,11 +26,11 @@ agent -p --force "Refactor src/utils.js to use ES6+ syntax"
 agent -p --force "$(cat path/to/prompt.txt)"
 ```
 
-**Using the wrapper script:**
+**Using the wrapper script (recommended):**
 
 ```bash
-./scripts/run-task.sh -f prompt.txt --force
-./scripts/run-task.sh -p "Add tests for auth module" -d /path/to/project --force -o json
+./scripts/run-task.sh -f prompt.txt
+./scripts/run-task.sh -p "Add tests for auth module" -d /path/to/project -o json
 ```
 
 ## Prompt handling
@@ -63,9 +63,9 @@ agent -p --force "$(cat path/to/prompt.txt)"
 | `json` | You need to parse the result (e.g. `jq -r '.result'`); single object at end |
 | `stream-json` | You need progress (model init, tool calls, partial text); NDJSON, one event per line. Use `--stream-partial-output` for character-level streaming |
 
-## Using the wrapper script
+## Using the wrapper script (recommended)
 
-`scripts/run-task.sh` wraps the CLI with consistent argument handling.
+**Recommended.** `scripts/run-task.sh` wraps the CLI with consistent argument handling. File modifications are allowed by default; use `--no-force` to only propose changes.
 
 **Arguments:**
 
@@ -75,20 +75,21 @@ agent -p --force "$(cat path/to/prompt.txt)"
 - `-o format` — `text`, `json`, or `stream-json` (default: `text`)
 - `-m model` — model name
 - `--mode mode` — `agent`, `plan`, or `ask`
-- `--force` — allow file modifications
+- `--force` — allow file modifications (default)
+- `--no-force` — do not modify files; agent only proposes changes
 - `--stream` — use `--stream-partial-output` (implies `stream-json`); requires `jq` for progress display
 
 **Examples:**
 
 ```bash
-# Task from file, apply changes, text output
-./scripts/run-task.sh -f tasks/refactor-auth.txt --force
+# Task from file, apply changes (default), text output
+./scripts/run-task.sh -f tasks/refactor-auth.txt
 
 # Inline prompt, specific project, JSON result
 ./scripts/run-task.sh -p "Summarize README.md" -d /path/to/repo -o json
 
 # Stream with live progress
-./scripts/run-task.sh -f tasks/review.txt -o stream-json --stream --force
+./scripts/run-task.sh -f tasks/review.txt -o stream-json --stream
 ```
 
 ## Error handling

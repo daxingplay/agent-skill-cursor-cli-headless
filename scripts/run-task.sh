@@ -11,7 +11,7 @@ DIR=""
 OUTPUT_FORMAT="text"
 MODEL=""
 MODE=""
-FORCE=false
+FORCE=true
 STREAM=false
 
 usage() {
@@ -27,13 +27,14 @@ Options:
   -o format         Output format: text, json, stream-json (default: text)
   -m model          Model name
   --mode mode       Mode: agent, plan, ask
-  --force           Allow file modifications
+  --force           Allow file modifications (default)
+  --no-force        Do not modify files; agent only proposes changes
   --stream          Use stream-json with --stream-partial-output; show progress (requires jq)
 
 Examples:
-  ./scripts/run-task.sh -f task.txt --force
-  ./scripts/run-task.sh -p "Refactor utils.js" -d /path/to/project -o json --force
-  ./scripts/run-task.sh -f review.txt -o stream-json --stream --force
+  ./scripts/run-task.sh -f task.txt
+  ./scripts/run-task.sh -p "Refactor utils.js" -d /path/to/project -o json
+  ./scripts/run-task.sh -f review.txt -o stream-json --stream
 EOF
   exit 1
 }
@@ -75,6 +76,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --force)
       FORCE=true
+      shift
+      ;;
+    --no-force)
+      FORCE=false
       shift
       ;;
     --stream)
