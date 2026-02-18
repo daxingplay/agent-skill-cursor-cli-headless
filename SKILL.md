@@ -49,6 +49,7 @@ Use `scripts/run-task.sh` with either an inline prompt or a prompt file:
 - `--no-force` — do not modify files; agent only proposes changes
 - `--stream` — stream-json with progress display (default; requires `jq` for progress)
 - `--no-stream` — plain output only; use with `-o text` or `-o json`
+- `--debug` — show full raw NDJSON on stdout (verbose); default shows only compact progress on stderr and final result text on stdout
 
 **Output formats:**
 
